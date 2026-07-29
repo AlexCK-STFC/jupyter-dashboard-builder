@@ -52,7 +52,7 @@ jobs:
           yq -i '.metadata.annotations["grafana_folder"] = "JupyterHub"' manifests/grafana-dashboards-cm.yaml
 
       - name: Create Pull Request on change
-        uses: peter-evans/create-pull-request@v6.1.0
+        uses: peter-evans/create-pull-request@v8.1.1
         with:
           commit-message: "chore(dashboards): sync upstream JupyterHub updates"
           title: "chore: update rendered Grafana dashboards from upstream"
