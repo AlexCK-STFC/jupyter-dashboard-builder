@@ -42,7 +42,7 @@ jobs:
           # Generate ConfigMap from all JSON files in rendered-dashboards/
           kubectl create configmap jupyterhub-grafana-dashboards \
             --from-file=rendered-dashboards/ \
-            --namespace=monitoring \
+            --namespace=monitoring-system \
             --dry-run=client -o yaml > manifests/grafana-dashboards-cm.yaml
 
           # Inject Grafana sidecar metadata
