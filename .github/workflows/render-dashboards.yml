@@ -3,6 +3,7 @@
 name: Update Dashboards
 
 on:
+
   schedule:
     - cron: "0 4 * * 1" # Runs every Monday at 4:00 AM UTC
   workflow_dispatch:
@@ -36,10 +37,19 @@ jobs:
           done
           rm -rf .upstream
 
-      - name: Build Kustomize Manifest
+      - name: Generate Dashboard ConfigMap Manifest
         run: |
           mkdir -p manifests
-          kubectl kustomize k8s/ > manifests/grafana-dashboards-cm.yaml
+
+          # Generate ConfigMap from all JSON files in rendered-dashboards/
+          kubectl create configmap jupyterhub-grafana-dashboards \
+            --from-file=rendered-dashboards/ \
+            --namespace=monitoring \
+            --dry-run=client -o yaml > manifests/grafana-dashboards-cm.yaml
+
+          # Inject Grafana sidecar metadata
+          yq -i '.metadata.labels["grafana_dashboard"] = "1"' manifests/grafana-dashboards-cm.yaml
+          yq -i '.metadata.annotations["grafana_folder"] = "JupyterHub"' manifests/grafana-dashboards-cm.yaml
 
       - name: Create Pull Request on change
         uses: peter-evans/create-pull-request@v6.1.0
