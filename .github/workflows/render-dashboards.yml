@@ -1,0 +1,53 @@
+# This workflow is managed by gh actions-lock.
+
+name: Update Dashboards
+
+on:
+  schedule:
+    - cron: "0 4 * * 1" # Runs every Monday at 4:00 AM UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync-dashboards:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout local repository
+        uses: actions/checkout@v4.4.0
+
+      - name: Checkout upstream repo
+        uses: actions/checkout@v4.4.0
+        with:
+          repository: jupyterhub/grafana-dashboards
+          path: .upstream
+
+      - name: Install Jsonnet
+        uses: kobtea/setup-jsonnet-action@v2
+
+      - name: Render Jsonnet files
+        run: |
+          mkdir -p rendered-dashboards
+          for file in .upstream/dashboards/*.jsonnet; do
+            out_file="rendered-dashboards/$(basename "$file" .jsonnet).json"
+            jsonnet -J .upstream/vendor -o "$out_file" "$file"
+          done
+          rm -rf .upstream
+
+      - name: Build Kustomize Manifest
+        run: |
+          mkdir -p manifests
+          kubectl kustomize k8s/ > manifests/grafana-dashboards-cm.yaml
+
+      - name: Create Pull Request on change
+        uses: peter-evans/create-pull-request@v6.1.0
+        with:
+          commit-message: "chore(dashboards): sync upstream JupyterHub updates"
+          title: "chore: update rendered Grafana dashboards from upstream"
+          body: |
+            Automated sync detected changes in `jupyterhub/grafana-dashboards`.
+            Review the generated JSON diff before merging.
+          branch: sync-upstream-dashboards
+          delete-branch: true
