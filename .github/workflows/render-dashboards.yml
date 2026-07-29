@@ -17,10 +17,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout local repository
-        uses: actions/checkout@v4.4.0
+        uses: actions/checkout@v7.0.1
 
       - name: Checkout upstream repo
-        uses: actions/checkout@v4.4.0
+        uses: actions/checkout@v7.0.1
         with:
           repository: jupyterhub/grafana-dashboards
           path: .upstream
