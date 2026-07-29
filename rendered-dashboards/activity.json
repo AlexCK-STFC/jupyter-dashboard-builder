@@ -1,0 +1,234 @@
+{
+   "editable": true,
+   "panels": [
+      {
+         "collapsed": false,
+         "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 0
+         },
+         "id": 1,
+         "panels": [ ],
+         "repeat": "PROMETHEUS_DS",
+         "title": "Activity ($PROMETHEUS_DS)",
+         "type": "row"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "description": "Number of running user servers at any given time.\n\nNote that a single user could have multiple servers running if the\nJupyterHub is configured with `c.JupyterHub.allow_named_servers = True`.\n",
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10,
+                  "lineInterpolation": "stepBefore",
+                  "stacking": {
+                     "mode": "normal"
+                  }
+               },
+               "decimals": 0,
+               "min": 0
+            }
+         },
+         "gridPos": {
+            "h": 8,
+            "w": 6,
+            "x": 0,
+            "y": 1
+         },
+         "id": 2,
+         "options": {
+            "tooltip": {
+               "mode": "multi"
+            }
+         },
+         "pluginVersion": "v11.1.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "max(\n  jupyterhub_running_servers{namespace=~\"$hub\"}\n) by (namespace)\n",
+               "legendFormat": "{{ namespace }}"
+            }
+         ],
+         "title": "Running Servers",
+         "type": "timeseries"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "description": "Number of unique users who were active within the preceding period.\n",
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10,
+                  "lineInterpolation": "stepAfter",
+                  "stacking": {
+                     "mode": "normal"
+                  }
+               },
+               "decimals": 0,
+               "min": 0
+            }
+         },
+         "gridPos": {
+            "h": 8,
+            "w": 6,
+            "x": 6,
+            "y": 1
+         },
+         "id": 3,
+         "options": {
+            "tooltip": {
+               "mode": "multi"
+            }
+         },
+         "pluginVersion": "v11.1.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "max(\n  jupyterhub_active_users{period=\"24h\", namespace=~\"$hub\"}\n) by (namespace)\n",
+               "legendFormat": "{{ namespace }}"
+            }
+         ],
+         "title": "Daily Active Users",
+         "type": "timeseries"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "description": "Number of unique users who were active within the preceding period.\n",
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10,
+                  "lineInterpolation": "stepAfter",
+                  "stacking": {
+                     "mode": "normal"
+                  }
+               },
+               "decimals": 0,
+               "min": 0
+            }
+         },
+         "gridPos": {
+            "h": 8,
+            "w": 6,
+            "x": 12,
+            "y": 1
+         },
+         "id": 4,
+         "options": {
+            "tooltip": {
+               "mode": "multi"
+            }
+         },
+         "pluginVersion": "v11.1.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "max(\n  jupyterhub_active_users{period=\"7d\", namespace=~\"$hub\"}\n) by (namespace)\n",
+               "legendFormat": "{{ namespace }}"
+            }
+         ],
+         "title": "Weekly Active Users",
+         "type": "timeseries"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "description": "Number of unique users who were active within the preceding period.\n",
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10,
+                  "lineInterpolation": "stepAfter",
+                  "stacking": {
+                     "mode": "normal"
+                  }
+               },
+               "decimals": 0,
+               "min": 0
+            }
+         },
+         "gridPos": {
+            "h": 8,
+            "w": 6,
+            "x": 18,
+            "y": 1
+         },
+         "id": 5,
+         "options": {
+            "tooltip": {
+               "mode": "multi"
+            }
+         },
+         "pluginVersion": "v11.1.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "max(\n  jupyterhub_active_users{period=\"30d\", namespace=~\"$hub\"}\n) by (namespace)\n",
+               "legendFormat": "{{ namespace }}"
+            }
+         ],
+         "title": "Monthly Active Users",
+         "type": "timeseries"
+      }
+   ],
+   "schemaVersion": 39,
+   "tags": [
+      "jupyterhub"
+   ],
+   "templating": {
+      "list": [
+         {
+            "hide": 1,
+            "includeAll": true,
+            "multi": true,
+            "name": "PROMETHEUS_DS",
+            "query": "prometheus",
+            "type": "datasource"
+         },
+         {
+            "allValue": ".*",
+            "datasource": {
+               "type": "prometheus",
+               "uid": "${PROMETHEUS_DS}"
+            },
+            "includeAll": true,
+            "multi": true,
+            "name": "hub",
+            "query": "label_values(kube_service_labels{service=\"hub\"}, namespace)",
+            "type": "query"
+         }
+      ]
+   },
+   "time": {
+      "from": "now-90d",
+      "to": "now"
+   },
+   "timezone": "utc",
+   "title": "Activity",
+   "uid": "jhgd-activity"
+}

@@ -1,0 +1,951 @@
+{
+   "editable": true,
+   "panels": [
+      {
+         "collapsed": false,
+         "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 0
+         },
+         "id": 1,
+         "panels": [ ],
+         "title": "NFS usage diagnostics",
+         "type": "row"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10,
+                  "lineInterpolation": "stepAfter"
+               },
+               "decimals": 0,
+               "min": 0
+            }
+         },
+         "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 0,
+            "y": 1
+         },
+         "id": 2,
+         "options": {
+            "tooltip": {
+               "mode": "multi"
+            }
+         },
+         "pluginVersion": "v11.1.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "sum(irate(node_nfs_requests_total[5m])) by (node) > 0\n",
+               "legendFormat": "{{ node }}"
+            }
+         ],
+         "title": "NFS requests, per node",
+         "type": "timeseries"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10,
+                  "lineInterpolation": "stepAfter"
+               },
+               "decimals": 0,
+               "min": 0
+            }
+         },
+         "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 12,
+            "y": 1
+         },
+         "id": 3,
+         "options": {
+            "tooltip": {
+               "mode": "multi"
+            }
+         },
+         "pluginVersion": "v11.1.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "sum(irate(node_nfs_requests_total[5m])) by (method) > 0\n",
+               "legendFormat": "{{ method }}"
+            }
+         ],
+         "title": "NFS requests, per operation",
+         "type": "timeseries"
+      },
+      {
+         "collapsed": false,
+         "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 11
+         },
+         "id": 4,
+         "panels": [ ],
+         "title": "NFS server diagnostics",
+         "type": "row"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "description": "The measured unit are CPU cores, and they are written out with SI prefixes, so 100m means 0.1 CPU cores.\n",
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10,
+                  "lineInterpolation": "stepAfter"
+               },
+               "min": 0,
+               "unit": "sishort"
+            },
+            "overrides": [
+               {
+                  "matcher": {
+                     "id": "byRegexp",
+                     "options": "/request.*/"
+                  },
+                  "properties": [
+                     {
+                        "id": "color",
+                        "value": {
+                           "fixedColor": "orange",
+                           "mode": "fixed"
+                        }
+                     },
+                     {
+                        "id": "custom.fillOpacity",
+                        "value": 0
+                     },
+                     {
+                        "id": "custom.lineStyle",
+                        "value": {
+                           "dash": [
+                              10,
+                              10
+                           ],
+                           "fill": "dash"
+                        }
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byRegexp",
+                     "options": "/limit.*/"
+                  },
+                  "properties": [
+                     {
+                        "id": "color",
+                        "value": {
+                           "fixedColor": "red",
+                           "mode": "fixed"
+                        }
+                     },
+                     {
+                        "id": "custom.fillOpacity",
+                        "value": 0
+                     },
+                     {
+                        "id": "custom.lineStyle",
+                        "value": {
+                           "dash": [
+                              10,
+                              10
+                           ],
+                           "fill": "dash"
+                        }
+                     }
+                  ]
+               }
+            ]
+         },
+         "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 0,
+            "y": 12
+         },
+         "id": 5,
+         "options": {
+            "tooltip": {
+               "mode": "multi"
+            }
+         },
+         "pluginVersion": "v11.1.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "sum(irate(container_cpu_usage_seconds_total{pod=~\".*home-nfs.*\", container!=\"\"}[5m])) by (namespace, container)\n",
+               "legendFormat": "{{namespace}}: {{container}}"
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "sum(kube_pod_container_resource_requests{pod=~\".*home-nfs-.*\", container!=\"\", resource=\"cpu\"}) by (namespace, container)\nand on() vector($show_requests) == 1\n",
+               "legendFormat": "request ({{namespace}}: {{container}})"
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "sum(kube_pod_container_resource_limits{pod=~\".*home-nfs-.*\", container!=\"\", resource=\"cpu\"}) by (namespace, container)\nand on() vector($show_limits) == 1\n",
+               "legendFormat": "limit ({{namespace}}: {{container}})"
+            }
+         ],
+         "title": "NFS server CPU usage",
+         "type": "timeseries"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10,
+                  "lineInterpolation": "stepAfter"
+               },
+               "min": 0,
+               "unit": "bytes"
+            },
+            "overrides": [
+               {
+                  "matcher": {
+                     "id": "byRegexp",
+                     "options": "/request.*/"
+                  },
+                  "properties": [
+                     {
+                        "id": "color",
+                        "value": {
+                           "fixedColor": "orange",
+                           "mode": "fixed"
+                        }
+                     },
+                     {
+                        "id": "custom.fillOpacity",
+                        "value": 0
+                     },
+                     {
+                        "id": "custom.lineStyle",
+                        "value": {
+                           "dash": [
+                              10,
+                              10
+                           ],
+                           "fill": "dash"
+                        }
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byRegexp",
+                     "options": "/limit.*/"
+                  },
+                  "properties": [
+                     {
+                        "id": "color",
+                        "value": {
+                           "fixedColor": "red",
+                           "mode": "fixed"
+                        }
+                     },
+                     {
+                        "id": "custom.fillOpacity",
+                        "value": 0
+                     },
+                     {
+                        "id": "custom.lineStyle",
+                        "value": {
+                           "dash": [
+                              10,
+                              10
+                           ],
+                           "fill": "dash"
+                        }
+                     }
+                  ]
+               }
+            ]
+         },
+         "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 12,
+            "y": 12
+         },
+         "id": 6,
+         "options": {
+            "tooltip": {
+               "mode": "multi"
+            }
+         },
+         "pluginVersion": "v11.1.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "sum(container_memory_working_set_bytes{pod=~\".*home-nfs-.*\", container!=\"\"}) by (namespace, container)\n",
+               "legendFormat": "{{namespace}}: {{container}}"
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "sum(kube_pod_container_resource_requests{pod=~\".*home-nfs-.*\", container!=\"\", resource=\"memory\"}) by (namespace, container)\nand on() vector($show_requests) == 1\n",
+               "legendFormat": "request ({{namespace}}: {{container}})"
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "sum(kube_pod_container_resource_limits{pod=~\".*home-nfs-.*\", container!=\"\", resource=\"memory\"}) by (namespace, container)\nand on() vector($show_limits) == 1\n",
+               "legendFormat": "limit ({{namespace}}: {{container}})"
+            }
+         ],
+         "title": "NFS server memory usage (working set)",
+         "type": "timeseries"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10,
+                  "lineInterpolation": "stepAfter"
+               },
+               "min": 0,
+               "unit": "bytes"
+            },
+            "overrides": [
+               {
+                  "matcher": {
+                     "id": "byRegexp",
+                     "options": "/capacity.*/"
+                  },
+                  "properties": [
+                     {
+                        "id": "color",
+                        "value": {
+                           "fixedColor": "red",
+                           "mode": "fixed"
+                        }
+                     },
+                     {
+                        "id": "custom.fillOpacity",
+                        "value": 0
+                     },
+                     {
+                        "id": "custom.lineStyle",
+                        "value": {
+                           "dash": [
+                              10,
+                              10
+                           ],
+                           "fill": "dash"
+                        }
+                     }
+                  ]
+               }
+            ]
+         },
+         "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 0,
+            "y": 22
+         },
+         "id": 7,
+         "options": {
+            "tooltip": {
+               "mode": "multi"
+            }
+         },
+         "pluginVersion": "v11.1.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "sum(kubelet_volume_stats_used_bytes{persistentvolumeclaim=~\".*home-nfs\"}) by (namespace, persistentvolumeclaim)\n",
+               "legendFormat": "{{namespace}}: {{persistentvolumeclaim}}"
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "sum(kubelet_volume_stats_capacity_bytes{persistentvolumeclaim=~\".*home-nfs\"}) by (namespace, persistentvolumeclaim)\nand on() vector($show_capacity) == 1\n",
+               "legendFormat": "capacity ({{namespace}}: {{persistentvolumeclaim}})"
+            }
+         ],
+         "title": "NFS server used disk space",
+         "type": "timeseries"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10,
+                  "lineInterpolation": "stepAfter"
+               },
+               "decimals": 0,
+               "min": 0,
+               "unit": "binBps"
+            }
+         },
+         "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 12,
+            "y": 22
+         },
+         "id": 8,
+         "options": {
+            "tooltip": {
+               "mode": "multi"
+            }
+         },
+         "pluginVersion": "v11.1.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "sum(irate(container_network_receive_bytes_total{pod=~\".*-home-nfs-.*\"}[5m])) by (namespace)\n",
+               "legendFormat": "receive ({{namespace}})"
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "sum(irate(container_network_transmit_bytes_total{pod=~\".*-home-nfs-.*\"}[5m])) by (namespace)\n",
+               "legendFormat": "transmit ({{namespace}})"
+            }
+         ],
+         "title": "NFS server network usage",
+         "type": "timeseries"
+      },
+      {
+         "collapsed": false,
+         "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 32
+         },
+         "id": 9,
+         "panels": [ ],
+         "title": "Prometheus server diagnostics",
+         "type": "row"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "description": "The measured unit are CPU cores, and they are written out with SI prefixes, so 100m means 0.1 CPU cores.\n",
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10,
+                  "lineInterpolation": "stepAfter"
+               },
+               "min": 0,
+               "unit": "sishort"
+            },
+            "overrides": [
+               {
+                  "matcher": {
+                     "id": "byRegexp",
+                     "options": "/request.*/"
+                  },
+                  "properties": [
+                     {
+                        "id": "color",
+                        "value": {
+                           "fixedColor": "orange",
+                           "mode": "fixed"
+                        }
+                     },
+                     {
+                        "id": "custom.fillOpacity",
+                        "value": 0
+                     },
+                     {
+                        "id": "custom.lineStyle",
+                        "value": {
+                           "dash": [
+                              10,
+                              10
+                           ],
+                           "fill": "dash"
+                        }
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byRegexp",
+                     "options": "/limit.*/"
+                  },
+                  "properties": [
+                     {
+                        "id": "color",
+                        "value": {
+                           "fixedColor": "red",
+                           "mode": "fixed"
+                        }
+                     },
+                     {
+                        "id": "custom.fillOpacity",
+                        "value": 0
+                     },
+                     {
+                        "id": "custom.lineStyle",
+                        "value": {
+                           "dash": [
+                              10,
+                              10
+                           ],
+                           "fill": "dash"
+                        }
+                     }
+                  ]
+               }
+            ]
+         },
+         "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 0,
+            "y": 33
+         },
+         "id": 10,
+         "options": {
+            "tooltip": {
+               "mode": "multi"
+            }
+         },
+         "pluginVersion": "v11.1.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "sum(irate(container_cpu_usage_seconds_total{pod=~\".*prometheus-server-.*\", container!=\"\"}[5m])) by (namespace, container)\n",
+               "legendFormat": "{{namespace}}: {{container}}"
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "sum(kube_pod_container_resource_requests{pod=~\".*prometheus-server-.*\", container!=\"\", resource=\"cpu\"}) by (namespace, container)\nand on() vector($show_requests) == 1\n",
+               "legendFormat": "request ({{namespace}}: {{container}})"
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "sum(kube_pod_container_resource_limits{pod=~\".*prometheus-server-.*\", container!=\"\", resource=\"cpu\"}) by (namespace, container)\nand on() vector($show_limits) == 1\n",
+               "legendFormat": "limit ({{namespace}}: {{container}})"
+            }
+         ],
+         "title": "Prometheus server CPU usage",
+         "type": "timeseries"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10,
+                  "lineInterpolation": "stepAfter"
+               },
+               "min": 0,
+               "unit": "bytes"
+            },
+            "overrides": [
+               {
+                  "matcher": {
+                     "id": "byRegexp",
+                     "options": "/request.*/"
+                  },
+                  "properties": [
+                     {
+                        "id": "color",
+                        "value": {
+                           "fixedColor": "orange",
+                           "mode": "fixed"
+                        }
+                     },
+                     {
+                        "id": "custom.fillOpacity",
+                        "value": 0
+                     },
+                     {
+                        "id": "custom.lineStyle",
+                        "value": {
+                           "dash": [
+                              10,
+                              10
+                           ],
+                           "fill": "dash"
+                        }
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byRegexp",
+                     "options": "/limit.*/"
+                  },
+                  "properties": [
+                     {
+                        "id": "color",
+                        "value": {
+                           "fixedColor": "red",
+                           "mode": "fixed"
+                        }
+                     },
+                     {
+                        "id": "custom.fillOpacity",
+                        "value": 0
+                     },
+                     {
+                        "id": "custom.lineStyle",
+                        "value": {
+                           "dash": [
+                              10,
+                              10
+                           ],
+                           "fill": "dash"
+                        }
+                     }
+                  ]
+               }
+            ]
+         },
+         "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 12,
+            "y": 33
+         },
+         "id": 11,
+         "options": {
+            "tooltip": {
+               "mode": "multi"
+            }
+         },
+         "pluginVersion": "v11.1.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "sum(container_memory_working_set_bytes{pod=~\".*prometheus-server-.*\", container!=\"\"}) by (namespace, container)\n",
+               "legendFormat": "{{namespace}}: {{container}}"
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "sum(kube_pod_container_resource_requests{pod=~\".*prometheus-server-.*\", container!=\"\", resource=\"memory\"}) by (namespace, container)\nand on() vector($show_requests) == 1\n",
+               "legendFormat": "request ({{namespace}}: {{container}})"
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "sum(kube_pod_container_resource_limits{pod=~\".*prometheus-server-.*\", container!=\"\", resource=\"memory\"}) by (namespace, container)\nand on() vector($show_limits) == 1\n",
+               "legendFormat": "limit ({{namespace}}: {{container}})"
+            }
+         ],
+         "title": "Prometheus server memory usage (working set)",
+         "type": "timeseries"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10,
+                  "lineInterpolation": "stepAfter"
+               },
+               "min": 0,
+               "unit": "bytes"
+            },
+            "overrides": [
+               {
+                  "matcher": {
+                     "id": "byRegexp",
+                     "options": "/capacity.*/"
+                  },
+                  "properties": [
+                     {
+                        "id": "color",
+                        "value": {
+                           "fixedColor": "red",
+                           "mode": "fixed"
+                        }
+                     },
+                     {
+                        "id": "custom.fillOpacity",
+                        "value": 0
+                     },
+                     {
+                        "id": "custom.lineStyle",
+                        "value": {
+                           "dash": [
+                              10,
+                              10
+                           ],
+                           "fill": "dash"
+                        }
+                     }
+                  ]
+               }
+            ]
+         },
+         "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 0,
+            "y": 43
+         },
+         "id": 12,
+         "options": {
+            "tooltip": {
+               "mode": "multi"
+            }
+         },
+         "pluginVersion": "v11.1.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "sum(kubelet_volume_stats_used_bytes{persistentvolumeclaim=~\".*-prometheus-server\"}) by (namespace, persistentvolumeclaim)\n",
+               "legendFormat": "{{namespace}}: {{persistentvolumeclaim}}"
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "sum(kubelet_volume_stats_capacity_bytes{persistentvolumeclaim=~\".*-prometheus-server\"}) by (namespace, persistentvolumeclaim)\nand on() vector($show_capacity) == 1\n",
+               "legendFormat": "capacity ({{namespace}}: {{persistentvolumeclaim}})"
+            }
+         ],
+         "title": "Prometheus server used disk space",
+         "type": "timeseries"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10,
+                  "lineInterpolation": "stepAfter"
+               },
+               "decimals": 0,
+               "min": 0,
+               "unit": "binBps"
+            }
+         },
+         "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 12,
+            "y": 43
+         },
+         "id": 13,
+         "options": {
+            "tooltip": {
+               "mode": "multi"
+            }
+         },
+         "pluginVersion": "v11.1.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "sum(irate(container_network_receive_bytes_total{pod=~\".*-prometheus-server-.*\"}[5m])) by (namespace)\n",
+               "legendFormat": "receive ({{namespace}})"
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "sum(irate(container_network_transmit_bytes_total{pod=~\".*-prometheus-server-.*\"}[5m])) by (namespace)\n",
+               "legendFormat": "transmit ({{namespace}})"
+            }
+         ],
+         "title": "Prometheus server network usage",
+         "type": "timeseries"
+      }
+   ],
+   "schemaVersion": 39,
+   "tags": [
+      "kubernetes",
+      "nfs",
+      "jupyterhub-home-nfs",
+      "prometheus"
+   ],
+   "templating": {
+      "list": [
+         {
+            "hide": 1,
+            "name": "PROMETHEUS_DS",
+            "query": "prometheus",
+            "type": "datasource"
+         },
+         {
+            "current": {
+               "selected": false,
+               "text": "Show",
+               "value": "1"
+            },
+            "description": "In panels showing containers' CPU/Memory usage, also show the containers' CPU/Memory requests.",
+            "label": "CPU/Memory requests",
+            "name": "show_requests",
+            "options": [
+               {
+                  "selected": true,
+                  "text": "Show",
+                  "value": "1"
+               },
+               {
+                  "selected": false,
+                  "text": "Hide",
+                  "value": "0"
+               }
+            ],
+            "query": "Show : 1,Hide : 0",
+            "type": "custom"
+         },
+         {
+            "current": {
+               "selected": false,
+               "text": "Hide",
+               "value": "0"
+            },
+            "description": "In panels showing containers' CPU/Memory usage, also show the containers' CPU/Memory limits.",
+            "label": "CPU/Memory limits",
+            "name": "show_limits",
+            "options": [
+               {
+                  "selected": true,
+                  "text": "Show",
+                  "value": "1"
+               },
+               {
+                  "selected": false,
+                  "text": "Hide",
+                  "value": "0"
+               }
+            ],
+            "query": "Show : 1,Hide : 0",
+            "type": "custom"
+         },
+         {
+            "current": {
+               "selected": false,
+               "text": "Show",
+               "value": "1"
+            },
+            "description": "In panels showing storage usage, also show the storage's capacity.",
+            "label": "Storage capacity",
+            "name": "show_capacity",
+            "options": [
+               {
+                  "selected": true,
+                  "text": "Show",
+                  "value": "1"
+               },
+               {
+                  "selected": false,
+                  "text": "Hide",
+                  "value": "0"
+               }
+            ],
+            "query": "Show : 1,Hide : 0",
+            "type": "custom"
+         }
+      ]
+   },
+   "time": {
+      "from": "now-6h",
+      "to": "now"
+   },
+   "timezone": "utc",
+   "title": "NFS usage, NFS server, and Prometheus server diagnostics"
+}
