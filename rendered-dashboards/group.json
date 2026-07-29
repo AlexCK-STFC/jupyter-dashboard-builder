@@ -1,0 +1,261 @@
+{
+   "editable": true,
+   "panels": [
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "description": "Per group memory usage.\n\nUser groups are derived from authenticator managed groups where available, e.g. GitHub teams. If a user is a member of multiple groups, then they will be assigned to the group 'other' by default. \n\nRequires https://github.com/2i2c-org/jupyterhub-groups-exporter to\nbe set up. If the panels show no data, then please try selecting another time range where usage was active.\n",
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10,
+                  "lineInterpolation": "stepAfter"
+               },
+               "min": 0,
+               "unit": "bytes"
+            }
+         },
+         "gridPos": {
+            "h": 12,
+            "w": 24,
+            "x": 0,
+            "y": 0
+         },
+         "id": 1,
+         "options": {
+            "tooltip": {
+               "mode": "multi"
+            }
+         },
+         "pluginVersion": "v11.1.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "sum(\n\n  # sum pod containers' Memory usage, for each namespace and user combination\n  sum(\n    container_memory_working_set_bytes{namespace=~\"$hub_name\", pod=~\"jupyter-.*\", name!=\"\"}\n\n    # add an annotation_hub_jupyter_org_username label\n    * on (namespace, pod) group_left(annotation_hub_jupyter_org_username)\n    group(\n        kube_pod_annotations{namespace=~\"$hub_name\", annotation_hub_jupyter_org_username=~\".*\"}\n    ) by (namespace, pod, annotation_hub_jupyter_org_username)\n  ) by (namespace, annotation_hub_jupyter_org_username)\n\n  # make namespace/user combinations become more namespace/user/usergroup combinations\n  * on (namespace, annotation_hub_jupyter_org_username) group_right()\n  group(\n    # duplicate jupyterhub_user_group_info's username label as annotation_hub_jupyter_org_username\n    label_replace(\n      jupyterhub_user_group_info{namespace=~\"$hub_name\", username=~\".*\", usergroup=~\"$user_group\", usergroup!=\"multiple\"},\n      \"annotation_hub_jupyter_org_username\", \"$1\", \"username\", \"(.+)\"\n    )\n  ) by (namespace, annotation_hub_jupyter_org_username, usergroup)\n\n) by (namespace, usergroup)\n",
+               "legendFormat": "{{ usergroup }} - ({{ namespace }})"
+            }
+         ],
+         "title": "Memory Usage",
+         "type": "timeseries"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "description": "Per group CPU usage\n\nThe measured unit are CPU cores, and they are written out with SI prefixes, so 100m means 0.1 CPU cores.\n\nUser groups are derived from authenticator managed groups where available, e.g. GitHub teams. If a user is a member of multiple groups, then they will be assigned to the group 'other' by default. \n\nRequires https://github.com/2i2c-org/jupyterhub-groups-exporter to\nbe set up. If the panels show no data, then please try selecting another time range where usage was active.\n",
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10,
+                  "lineInterpolation": "stepAfter"
+               },
+               "min": 0,
+               "unit": "sishort"
+            }
+         },
+         "gridPos": {
+            "h": 12,
+            "w": 24,
+            "x": 0,
+            "y": 12
+         },
+         "id": 2,
+         "options": {
+            "tooltip": {
+               "mode": "multi"
+            }
+         },
+         "pluginVersion": "v11.1.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "sum(\n\n  # sum pod containers' CPU usage, for each namespace and user combination\n  sum(\n    irate(container_cpu_usage_seconds_total{pod=~\"jupyter-.*\", name!=\"\"}[5m])\n\n    # add an annotation_hub_jupyter_org_username label\n    * on (namespace, pod) group_left(annotation_hub_jupyter_org_username)\n    group(\n        kube_pod_annotations{namespace=~\"$hub_name\", annotation_hub_jupyter_org_username=~\".*\"}\n    ) by (namespace, pod, annotation_hub_jupyter_org_username)\n  ) by (namespace, annotation_hub_jupyter_org_username)\n\n  # make namespace/user combinations become more namespace/user/usergroup combinations\n  * on (namespace, annotation_hub_jupyter_org_username) group_right()\n  group(\n    # duplicate jupyterhub_user_group_info's username label as annotation_hub_jupyter_org_username\n    label_replace(\n      jupyterhub_user_group_info{namespace=~\"$hub_name\", username=~\".*\", usergroup=~\"$user_group\", usergroup!=\"multiple\"},\n      \"annotation_hub_jupyter_org_username\", \"$1\", \"username\", \"(.+)\"\n    )\n  ) by (namespace, annotation_hub_jupyter_org_username, usergroup)\n\n) by (namespace, usergroup)\n",
+               "legendFormat": "{{ usergroup }} - ({{ namespace }})"
+            }
+         ],
+         "title": "CPU Usage",
+         "type": "timeseries"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "description": "Per group home directory size, when using a shared home directory.\n\nUser groups are derived from authenticator managed groups where available, e.g. GitHub teams. If a user is a member of multiple groups, then they will be assigned to the group 'other' by default. \n\nRequires https://github.com/yuvipanda/prometheus-dirsize-exporter and https://github.com/2i2c-org/jupyterhub-groups-exporter to\nbe set up.\n",
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10,
+                  "lineInterpolation": "stepAfter"
+               },
+               "min": 0,
+               "unit": "bytes"
+            }
+         },
+         "gridPos": {
+            "h": 12,
+            "w": 24,
+            "x": 0,
+            "y": 24
+         },
+         "id": 3,
+         "options": {
+            "tooltip": {
+               "mode": "multi"
+            }
+         },
+         "pluginVersion": "v11.1.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "sum(\n\n  # max is used to de-duplicate data from multiple sources\n  max(\n    dirsize_total_size_bytes{namespace=~\"$hub_name\"}\n  ) by (namespace, directory)\n\n  # make namespace/directory combinations become more namespace/directory/usergroup combinations\n  * on (namespace, directory) group_right()\n  group(\n    # match using username_safe (kubespawner's modern \"safe\" scheme)\n    # duplicate jupyterhub_user_group_info's username_safe label as directory\n    label_replace(\n      jupyterhub_user_group_info{namespace=~\"$hub_name\", username_safe=~\".*\", usergroup=~\"$user_group\", usergroup!=\"multiple\"},\n      \"directory\", \"$1\", \"username_safe\", \"(.+)\"\n    )\n    or\n    # match using username_escaped (kubespawner's legacy \"escape\" scheme)\n    # duplicate jupyterhub_user_group_info's username_escaped label as directory\n    label_replace(\n      jupyterhub_user_group_info{namespace=~\"$hub_name\", username_escaped=~\".*\", usergroup=~\"$user_group\", usergroup!=\"multiple\"},\n      \"directory\", \"$1\", \"username_escaped\", \"(.+)\"\n    )\n  ) by (namespace, directory, usergroup)\n\n) by (namespace, usergroup)\n",
+               "legendFormat": "{{ usergroup }} - ({{ namespace }})"
+            }
+         ],
+         "title": "Home Directory Usage (on shared home directories)",
+         "type": "timeseries"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "description": "Per group memory requests\n\nUser groups are derived from authenticator managed groups where available, e.g. GitHub teams. If a user is a member of multiple groups, then they will be assigned to the group 'other' by default. \n\nRequires https://github.com/2i2c-org/jupyterhub-groups-exporter to\nbe set up. If the panels show no data, then please try selecting another time range where usage was active.\n",
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10,
+                  "lineInterpolation": "stepAfter"
+               },
+               "min": 0,
+               "unit": "bytes"
+            }
+         },
+         "gridPos": {
+            "h": 12,
+            "w": 24,
+            "x": 0,
+            "y": 36
+         },
+         "id": 4,
+         "options": {
+            "tooltip": {
+               "mode": "multi"
+            }
+         },
+         "pluginVersion": "v11.1.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "sum(\n\n  # sum pod containers' Memory requests, for each namespace and user combination\n  sum(\n    kube_pod_container_resource_requests{resource=\"memory\", namespace=~\"$hub_name\", pod=~\"jupyter-.*\"}\n\n    # add an annotation_hub_jupyter_org_username label\n    * on (namespace, pod) group_left(annotation_hub_jupyter_org_username)\n    group(\n        kube_pod_annotations{namespace=~\"$hub_name\", annotation_hub_jupyter_org_username=~\".*\"}\n    ) by (namespace, pod, annotation_hub_jupyter_org_username)\n  ) by (namespace, annotation_hub_jupyter_org_username)\n\n  # make namespace/user combinations become more namespace/user/usergroup combinations\n  * on (namespace, annotation_hub_jupyter_org_username) group_right()\n  group(\n    # duplicate jupyterhub_user_group_info's username label as annotation_hub_jupyter_org_username\n    label_replace(\n      jupyterhub_user_group_info{namespace=~\"$hub_name\", username=~\".*\", usergroup=~\"$user_group\", usergroup!=\"multiple\"},\n      \"annotation_hub_jupyter_org_username\", \"$1\", \"username\", \"(.+)\"\n    )\n  ) by (namespace, annotation_hub_jupyter_org_username, usergroup)\n\n) by (namespace, usergroup)\n",
+               "legendFormat": "{{ usergroup }} - ({{ namespace }})"
+            }
+         ],
+         "title": "Memory Requests",
+         "type": "timeseries"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "description": "Per group CPU requests\n\nThe measured unit are CPU cores, and they are written out with SI prefixes, so 100m means 0.1 CPU cores.\n\nUser groups are derived from authenticator managed groups where available, e.g. GitHub teams. If a user is a member of multiple groups, then they will be assigned to the group 'other' by default. \n\nRequires https://github.com/2i2c-org/jupyterhub-groups-exporter to\nbe set up. If the panels show no data, then please try selecting another time range where usage was active.\n",
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10,
+                  "lineInterpolation": "stepAfter"
+               },
+               "min": 0,
+               "unit": "sishort"
+            }
+         },
+         "gridPos": {
+            "h": 12,
+            "w": 24,
+            "x": 0,
+            "y": 48
+         },
+         "id": 5,
+         "options": {
+            "tooltip": {
+               "mode": "multi"
+            }
+         },
+         "pluginVersion": "v11.1.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "sum(\n\n  # sum pod containers' CPU requests, for each namespace and user combination\n  sum(\n    kube_pod_container_resource_requests{resource=\"cpu\", namespace=~\"$hub_name\", pod=~\"jupyter-.*\"}\n\n    # add an annotation_hub_jupyter_org_username label\n    * on (namespace, pod) group_left(annotation_hub_jupyter_org_username)\n    group(\n        kube_pod_annotations{namespace=~\"$hub_name\", annotation_hub_jupyter_org_username=~\".*\"}\n    ) by (namespace, pod, annotation_hub_jupyter_org_username)\n  ) by (namespace, annotation_hub_jupyter_org_username)\n\n  # make namespace/user combinations become more namespace/user/usergroup combinations\n  * on (namespace, annotation_hub_jupyter_org_username) group_right()\n  group(\n    # duplicate jupyterhub_user_group_info's username label as annotation_hub_jupyter_org_username\n    label_replace(\n      jupyterhub_user_group_info{namespace=~\"$hub_name\", username=~\".*\", usergroup=~\"$user_group\", usergroup!=\"multiple\"},\n      \"annotation_hub_jupyter_org_username\", \"$1\", \"username\", \"(.+)\"\n    )\n  ) by (namespace, annotation_hub_jupyter_org_username, usergroup)\n\n) by (namespace, usergroup)\n",
+               "legendFormat": "{{ usergroup }} - ({{ namespace }})"
+            }
+         ],
+         "title": "CPU Requests",
+         "type": "timeseries"
+      }
+   ],
+   "schemaVersion": 39,
+   "tags": [
+      "jupyterhub"
+   ],
+   "templating": {
+      "list": [
+         {
+            "hide": 1,
+            "name": "PROMETHEUS_DS",
+            "query": "prometheus",
+            "type": "datasource"
+         },
+         {
+            "allValue": ".*",
+            "datasource": {
+               "type": "prometheus",
+               "uid": "${PROMETHEUS_DS}"
+            },
+            "includeAll": true,
+            "multi": true,
+            "name": "hub_name",
+            "query": "label_values(kube_service_labels{service=\"hub\"}, namespace)",
+            "type": "query"
+         },
+         {
+            "allValue": ".*",
+            "datasource": {
+               "type": "prometheus",
+               "uid": "${PROMETHEUS_DS}"
+            },
+            "includeAll": true,
+            "multi": true,
+            "name": "user_group",
+            "query": "label_values(jupyterhub_user_group_info, usergroup)",
+            "regex": "^(?!multiple$).+",
+            "type": "query"
+         }
+      ]
+   },
+   "time": {
+      "from": "now-6h",
+      "to": "now"
+   },
+   "timezone": "utc",
+   "title": "User Group Diagnostics Dashboard",
+   "uid": "group-diagnostics-dashboard"
+}

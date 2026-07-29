@@ -1,0 +1,260 @@
+{
+   "editable": true,
+   "panels": [
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "description": "Per user memory usage\n",
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10,
+                  "lineInterpolation": "stepAfter"
+               },
+               "min": 0,
+               "unit": "bytes"
+            }
+         },
+         "gridPos": {
+            "h": 12,
+            "w": 24,
+            "x": 0,
+            "y": 0
+         },
+         "id": 1,
+         "options": {
+            "tooltip": {
+               "mode": "multi"
+            }
+         },
+         "pluginVersion": "v11.1.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "sum(\n  container_memory_working_set_bytes{name!=\"\", pod=~\"jupyter-.*\", namespace=~\"$hub_name\"}\n    * on (namespace, pod) group_left(annotation_hub_jupyter_org_username)\n    group(\n        kube_pod_annotations{namespace=~\"$hub_name\", annotation_hub_jupyter_org_username=~\"$user_name\", pod=~\"jupyter-.*\"}\n    ) by (pod, namespace, annotation_hub_jupyter_org_username)\n) by (annotation_hub_jupyter_org_username, namespace)\n",
+               "legendFormat": "{{ annotation_hub_jupyter_org_username }} - ({{ namespace }})"
+            }
+         ],
+         "title": "Memory Usage",
+         "type": "timeseries"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "description": "Per user CPU usage\n\nThe measured unit are CPU cores, and they are written out with SI prefixes, so 100m means 0.1 CPU cores.\n",
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10,
+                  "lineInterpolation": "stepAfter"
+               },
+               "min": 0,
+               "unit": "sishort"
+            }
+         },
+         "gridPos": {
+            "h": 12,
+            "w": 24,
+            "x": 0,
+            "y": 12
+         },
+         "id": 2,
+         "options": {
+            "tooltip": {
+               "mode": "multi"
+            }
+         },
+         "pluginVersion": "v11.1.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "sum(\n  # exclude name=\"\" because the same container can be reported\n  # with both no name and `name=k8s_...`,\n  # in which case sum() by (pod) reports double the actual metric\n  irate(container_cpu_usage_seconds_total{name!=\"\", pod=~\"jupyter-.*\"}[5m])\n  * on (namespace, pod) group_left(annotation_hub_jupyter_org_username)\n  group(\n      kube_pod_annotations{namespace=~\"$hub_name\", annotation_hub_jupyter_org_username=~\"$user_name\"}\n  ) by (pod, namespace, annotation_hub_jupyter_org_username)\n) by (annotation_hub_jupyter_org_username, namespace)\n",
+               "legendFormat": "{{ annotation_hub_jupyter_org_username }} - ({{ namespace }})"
+            }
+         ],
+         "title": "CPU Usage",
+         "type": "timeseries"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "description": "Per user home directory size, when using a shared home directory.\n\nRequires https://github.com/yuvipanda/prometheus-dirsize-exporter to\nbe set up.\n\nSimilar to server pod names, user names will be *encoded* here\nusing the escapism python library (https://github.com/minrk/escapism).\nYou can unencode them with the following python snippet:\n\nfrom escapism import unescape\nunescape('<escaped-username>', '-')\n",
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10,
+                  "lineInterpolation": "stepAfter"
+               },
+               "min": 0,
+               "unit": "bytes"
+            }
+         },
+         "gridPos": {
+            "h": 12,
+            "w": 24,
+            "x": 0,
+            "y": 24
+         },
+         "id": 3,
+         "options": {
+            "tooltip": {
+               "mode": "multi"
+            }
+         },
+         "pluginVersion": "v11.1.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "sum(\n\n  # max is used to de-duplicate data from multiple sources\n  max(\n    dirsize_total_size_bytes{namespace=~\"$hub_name\"}\n  ) by (namespace, directory)\n\n  # make namespace/directory combinations become more namespace/directory/username combinations\n  * on (namespace, directory) group_right()\n  group(\n    # match using username_safe (kubespawner's modern \"safe\" scheme)\n    # duplicate jupyterhub_user_group_info's username_safe label as directory\n    label_replace(\n      jupyterhub_user_group_info{namespace=~\"$hub_name\", username_safe=~\".*\"},\n      \"directory\", \"$1\", \"username_safe\", \"(.+)\"\n    )\n    or\n    # match using username_escaped (kubespawner's legacy \"escape\" scheme)\n    # duplicate jupyterhub_user_group_info's username_escaped label as directory\n    label_replace(\n      jupyterhub_user_group_info{namespace=~\"$hub_name\", username_escaped=~\".*\"},\n      \"directory\", \"$1\", \"username_escaped\", \"(.+)\"\n    )\n  ) by (namespace, directory, username)\n\n) by (namespace, username)\n",
+               "legendFormat": "{{ username }} - ({{ namespace }})"
+            }
+         ],
+         "title": "Home Directory Usage (on shared home directories)",
+         "type": "timeseries"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "description": "Per-user memory requests\n",
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10,
+                  "lineInterpolation": "stepAfter"
+               },
+               "min": 0,
+               "unit": "bytes"
+            }
+         },
+         "gridPos": {
+            "h": 12,
+            "w": 24,
+            "x": 0,
+            "y": 36
+         },
+         "id": 4,
+         "options": {
+            "tooltip": {
+               "mode": "multi"
+            }
+         },
+         "pluginVersion": "v11.1.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "sum(\n  kube_pod_container_resource_requests{resource=\"memory\", namespace=~\"$hub_name\", pod=~\"jupyter-.*\"}  * on (namespace, pod)\n  group_left(annotation_hub_jupyter_org_username) group(\n    kube_pod_annotations{namespace=~\"$hub_name\", annotation_hub_jupyter_org_username=~\"$user_name\"}\n    ) by (pod, namespace, annotation_hub_jupyter_org_username)\n) by (annotation_hub_jupyter_org_username, namespace)\n",
+               "legendFormat": "{{ annotation_hub_jupyter_org_username }} - ({{ namespace }})"
+            }
+         ],
+         "title": "Memory Requests",
+         "type": "timeseries"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "description": "Per user CPU requests\n\nThe measured unit are CPU cores, and they are written out with SI prefixes, so 100m means 0.1 CPU cores.\n",
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10,
+                  "lineInterpolation": "stepAfter"
+               },
+               "min": 0,
+               "unit": "sishort"
+            }
+         },
+         "gridPos": {
+            "h": 12,
+            "w": 24,
+            "x": 0,
+            "y": 48
+         },
+         "id": 5,
+         "options": {
+            "tooltip": {
+               "mode": "multi"
+            }
+         },
+         "pluginVersion": "v11.1.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$PROMETHEUS_DS"
+               },
+               "expr": "sum(\n  kube_pod_container_resource_requests{resource=\"cpu\", namespace=~\"$hub_name\", pod=~\"jupyter-.*\"} * on (namespace, pod)\n  group_left(annotation_hub_jupyter_org_username) group(\n    kube_pod_annotations{namespace=~\"$hub_name\", annotation_hub_jupyter_org_username=~\"$user_name\"}\n    ) by (pod, namespace, annotation_hub_jupyter_org_username)\n) by (annotation_hub_jupyter_org_username, namespace)\n",
+               "legendFormat": "{{ annotation_hub_jupyter_org_username }} - ({{ namespace }})"
+            }
+         ],
+         "title": "CPU Requests",
+         "type": "timeseries"
+      }
+   ],
+   "schemaVersion": 39,
+   "tags": [
+      "jupyterhub"
+   ],
+   "templating": {
+      "list": [
+         {
+            "hide": 1,
+            "name": "PROMETHEUS_DS",
+            "query": "prometheus",
+            "type": "datasource"
+         },
+         {
+            "allValue": ".*",
+            "datasource": {
+               "type": "prometheus",
+               "uid": "${PROMETHEUS_DS}"
+            },
+            "includeAll": true,
+            "multi": true,
+            "name": "hub_name",
+            "query": "label_values(kube_service_labels{service=\"hub\"}, namespace)",
+            "type": "query"
+         },
+         {
+            "allValue": ".*",
+            "datasource": {
+               "type": "prometheus",
+               "uid": "${PROMETHEUS_DS}"
+            },
+            "includeAll": true,
+            "multi": true,
+            "name": "user_name",
+            "query": "label_values(kube_pod_annotations{ namespace=~\"$hub_name\"}, annotation_hub_jupyter_org_username)",
+            "type": "query"
+         }
+      ]
+   },
+   "time": {
+      "from": "now-6h",
+      "to": "now"
+   },
+   "timezone": "utc",
+   "title": "User Diagnostics Dashboard",
+   "uid": "user-diagnostics-dashboard"
+}
