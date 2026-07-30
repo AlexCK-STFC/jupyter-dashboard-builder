@@ -60,13 +60,13 @@ jobs:
           yq -i '.metadata.labels["grafana_dashboard"] = "1"' manifests/grafana-dashboards-cm.yaml
           yq -i '.metadata.annotations["grafana_folder"] = "JupyterHub"' manifests/grafana-dashboards-cm.yaml
 
-      # - name: Create Pull Request on change
-      #   uses: peter-evans/create-pull-request@v8.1.1
-      #   with:
-      #     commit-message: "chore(dashboards): sync upstream JupyterHub updates"
-      #     title: "chore: update rendered Grafana dashboards from upstream"
-      #     body: |
-      #       Automated sync detected changes in `jupyterhub/grafana-dashboards`.
-      #       Review the generated JSON diff before merging.
-      #     branch: sync-upstream-dashboards
-      #     delete-branch: true
+      - name: Create Pull Request on change
+        uses: peter-evans/create-pull-request@v8.1.1
+        with:
+          commit-message: "chore(dashboards): sync upstream JupyterHub updates"
+          title: "chore: update rendered Grafana dashboards from upstream"
+          body: |
+            Automated sync detected changes in `jupyterhub/grafana-dashboards`.
+            Review the generated JSON diff before merging.
+          branch: sync-upstream-dashboards
+          delete-branch: true
