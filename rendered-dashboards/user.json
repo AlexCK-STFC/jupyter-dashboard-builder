@@ -219,6 +219,25 @@
    "templating": {
       "list": [
          {
+            "baseFilters": [
+               {
+                  "condition": "",
+                  "key": "cluster",
+                  "operator": "=",
+                  "value": ""
+               }
+            ],
+            "datasource": {
+               "type": "prometheus",
+               "uid": "${PROMETHEUS_DS}"
+            },
+            "filters": [ ],
+            "hide": 0,
+            "label": "cluster",
+            "name": "cluster",
+            "type": "adhoc"
+         },
+         {
             "hide": 1,
             "name": "PROMETHEUS_DS",
             "query": "prometheus",
