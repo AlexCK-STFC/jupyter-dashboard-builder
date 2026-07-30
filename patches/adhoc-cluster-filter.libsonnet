@@ -20,8 +20,9 @@ function(dashboard)
     datasource: { type: 'prometheus', uid: '${%s}' % datasourceVarName },
     hide: 0,
     filters: [],
-    baseFilters: [
-      { key: 'cluster', operator: '=', value: '', condition: '' },
+    baseFilters: [],
+    defaultKeys: [
+      { text: 'cluster', value: 'cluster' },
     ],
   };
 
