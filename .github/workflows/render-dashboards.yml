@@ -30,8 +30,19 @@ jobs:
         run: |
           mkdir -p rendered-dashboards
           for file in .upstream/dashboards/*.jsonnet; do
-            out_file="rendered-dashboards/$(basename "$file" .jsonnet).json"
-            jsonnet -J .upstream/vendor -o "$out_file" "$file"
+            name=$(basename "$file" .jsonnet)
+            out_file="rendered-dashboards/${name}.json"
+            wrapper="/tmp/${name}-wrapper.jsonnet"
+
+            # Generate a wrapper that imports the upstream dashboard and
+            # runs it through our local patch pipeline (patches/main.libsonnet).
+            cat > "$wrapper" <<-EOF
+            local dashboard = import "$(pwd)/${file}";
+            local patches = import "$(pwd)/patches/main.libsonnet";
+            patches.apply(dashboard)
+          EOF
+
+            jsonnet -J .upstream/vendor -o "$out_file" "$wrapper"
           done
           rm -rf .upstream
 
@@ -49,13 +60,13 @@ jobs:
           yq -i '.metadata.labels["grafana_dashboard"] = "1"' manifests/grafana-dashboards-cm.yaml
           yq -i '.metadata.annotations["grafana_folder"] = "JupyterHub"' manifests/grafana-dashboards-cm.yaml
 
-      - name: Create Pull Request on change
-        uses: peter-evans/create-pull-request@v8.1.1
-        with:
-          commit-message: "chore(dashboards): sync upstream JupyterHub updates"
-          title: "chore: update rendered Grafana dashboards from upstream"
-          body: |
-            Automated sync detected changes in `jupyterhub/grafana-dashboards`.
-            Review the generated JSON diff before merging.
-          branch: sync-upstream-dashboards
-          delete-branch: true
+      # - name: Create Pull Request on change
+      #   uses: peter-evans/create-pull-request@v8.1.1
+      #   with:
+      #     commit-message: "chore(dashboards): sync upstream JupyterHub updates"
+      #     title: "chore: update rendered Grafana dashboards from upstream"
+      #     body: |
+      #       Automated sync detected changes in `jupyterhub/grafana-dashboards`.
+      #       Review the generated JSON diff before merging.
+      #     branch: sync-upstream-dashboards
+      #     delete-branch: true
