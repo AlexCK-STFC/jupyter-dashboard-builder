@@ -207,18 +207,17 @@ data:
        "templating": {
           "list": [
              {
-                "baseFilters": [
-                   {
-                      "condition": "",
-                      "key": "cluster",
-                      "operator": "=",
-                      "value": ""
-                   }
-                ],
+                "baseFilters": [ ],
                 "datasource": {
                    "type": "prometheus",
                    "uid": "${PROMETHEUS_DS}"
                 },
+                "defaultKeys": [
+                   {
+                      "text": "cluster",
+                      "value": "cluster"
+                   }
+                ],
                 "filters": [ ],
                 "hide": 0,
                 "label": "cluster",
@@ -962,18 +961,17 @@ data:
        "templating": {
           "list": [
              {
-                "baseFilters": [
-                   {
-                      "condition": "",
-                      "key": "cluster",
-                      "operator": "=",
-                      "value": ""
-                   }
-                ],
+                "baseFilters": [ ],
                 "datasource": {
                    "type": "prometheus",
                    "uid": "${PROMETHEUS_DS}"
                 },
+                "defaultKeys": [
+                   {
+                      "text": "cluster",
+                      "value": "cluster"
+                   }
+                ],
                 "filters": [ ],
                 "hide": 0,
                 "label": "cluster",
@@ -1217,18 +1215,17 @@ data:
        "templating": {
           "list": [
              {
-                "baseFilters": [
-                   {
-                      "condition": "",
-                      "key": "cluster",
-                      "operator": "=",
-                      "value": ""
-                   }
-                ],
+                "baseFilters": [ ],
                 "datasource": {
                    "type": "prometheus",
                    "uid": "${PROMETHEUS_DS}"
                 },
+                "defaultKeys": [
+                   {
+                      "text": "cluster",
+                      "value": "cluster"
+                   }
+                ],
                 "filters": [ ],
                 "hide": 0,
                 "label": "cluster",
@@ -1421,18 +1418,17 @@ data:
        "templating": {
           "list": [
              {
-                "baseFilters": [
-                   {
-                      "condition": "",
-                      "key": "cluster",
-                      "operator": "=",
-                      "value": ""
-                   }
-                ],
+                "baseFilters": [ ],
                 "datasource": {
                    "type": "prometheus",
                    "uid": "${PROMETHEUS_DS}"
                 },
+                "defaultKeys": [
+                   {
+                      "text": "cluster",
+                      "value": "cluster"
+                   }
+                ],
                 "filters": [ ],
                 "hide": 0,
                 "label": "cluster",
@@ -2401,18 +2397,17 @@ data:
        "templating": {
           "list": [
              {
-                "baseFilters": [
-                   {
-                      "condition": "",
-                      "key": "cluster",
-                      "operator": "=",
-                      "value": ""
-                   }
-                ],
+                "baseFilters": [ ],
                 "datasource": {
                    "type": "prometheus",
                    "uid": "${PROMETHEUS_DS}"
                 },
+                "defaultKeys": [
+                   {
+                      "text": "cluster",
+                      "value": "cluster"
+                   }
+                ],
                 "filters": [ ],
                 "hide": 0,
                 "label": "cluster",
@@ -3313,18 +3308,17 @@ data:
        "templating": {
           "list": [
              {
-                "baseFilters": [
-                   {
-                      "condition": "",
-                      "key": "cluster",
-                      "operator": "=",
-                      "value": ""
-                   }
-                ],
+                "baseFilters": [ ],
                 "datasource": {
                    "type": "prometheus",
                    "uid": "${PROMETHEUS_DS}"
                 },
+                "defaultKeys": [
+                   {
+                      "text": "cluster",
+                      "value": "cluster"
+                   }
+                ],
                 "filters": [ ],
                 "hide": 0,
                 "label": "cluster",
@@ -3575,18 +3569,17 @@ data:
        "templating": {
           "list": [
              {
-                "baseFilters": [
-                   {
-                      "condition": "",
-                      "key": "cluster",
-                      "operator": "=",
-                      "value": ""
-                   }
-                ],
+                "baseFilters": [ ],
                 "datasource": {
                    "type": "prometheus",
                    "uid": "${PROMETHEUS_DS}"
                 },
+                "defaultKeys": [
+                   {
+                      "text": "cluster",
+                      "value": "cluster"
+                   }
+                ],
                 "filters": [ ],
                 "hide": 0,
                 "label": "cluster",
@@ -3842,18 +3835,17 @@ data:
        "templating": {
           "list": [
              {
-                "baseFilters": [
-                   {
-                      "condition": "",
-                      "key": "cluster",
-                      "operator": "=",
-                      "value": ""
-                   }
-                ],
+                "baseFilters": [ ],
                 "datasource": {
                    "type": "prometheus",
                    "uid": "${PROMETHEUS_DS}"
                 },
+                "defaultKeys": [
+                   {
+                      "text": "cluster",
+                      "value": "cluster"
+                   }
+                ],
                 "filters": [ ],
                 "hide": 0,
                 "label": "cluster",
